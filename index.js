@@ -6,17 +6,10 @@ import { fileURLToPath } from "url";
 const app = express();
 app.use(express.json());
 
-// ✅ NO CACHE para la API (evita que el browser use respuestas viejas)
-app.use("/api", (req, res, next) => {
-  res.setHeader("Cache-Control", "no-store");
-  next();
-});
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ✅ ruta hacia tu frontend (carpeta retail-dashboard-app)
-// Ajuste: server está en retail-dashboard-app-server, por eso usamos ../
 const CLIENT_DIR = path.join(__dirname, "..", "retail-dashboard-app");
 
 // ✅ ruta data/products.json
@@ -25,36 +18,103 @@ const PRODUCTS_PATH = path.join(__dirname, "data", "products.json");
 // Servir frontend
 app.use(express.static(CLIENT_DIR));
 
-// Helper para leer JSON
+// Helpers
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf-8"));
 }
 
+function writeJson(filePath, data) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+}
+
 // ===== API =====
 
-// Lista de productos (para galería)
+// Lista de productos
 app.get("/api/products", (req, res) => {
   try {
     const products = readJson(PRODUCTS_PATH);
     res.json(products);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Could not read products.json" });
   }
 });
 
-// Producto por id (para product.html?id=...)
+// Producto por id
 app.get("/api/products/:id", (req, res) => {
   try {
     const products = readJson(PRODUCTS_PATH);
     const product = products.find((p) => p.id === req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
     res.json(product);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Could not read products.json" });
   }
 });
 
-// Ruta fallback: si entras /, manda index.html
+// ✅ CHECKOUT: resta stock y guarda products.json
+app.post("/api/checkout", (req, res) => {
+  try {
+    const items = Array.isArray(req.body?.items) ? req.body.items : [];
+
+    if (!items.length) {
+      return res.status(400).json({ error: "Cart is empty." });
+    }
+
+    // items esperados: [{ id, qty, size? }]
+    // agregamos por id (stock no depende de talla en tu JSON)
+    const qtyById = new Map();
+    for (const it of items) {
+      const id = String(it.id || "").trim();
+      const qty = Number(it.qty || 0);
+
+      if (!id || !Number.isFinite(qty) || qty <= 0) continue;
+
+      qtyById.set(id, (qtyById.get(id) || 0) + qty);
+    }
+
+    if (qtyById.size === 0) {
+      return res.status(400).json({ error: "Invalid cart items." });
+    }
+
+    const products = readJson(PRODUCTS_PATH);
+
+    // Validación: producto existe y stock suficiente
+    const errors = [];
+    for (const [id, qty] of qtyById.entries()) {
+      const p = products.find((x) => x.id === id);
+      if (!p) {
+        errors.push({ id, reason: "Product not found" });
+        continue;
+      }
+      const stock = Number(p.stock || 0);
+      if (stock < qty) {
+        errors.push({ id, reason: "Not enough stock", stock, requested: qty });
+      }
+    }
+
+    if (errors.length) {
+      return res.status(400).json({
+        error: "Checkout failed.",
+        details: errors,
+      });
+    }
+
+    // Resta stock
+    for (const [id, qty] of qtyById.entries()) {
+      const p = products.find((x) => x.id === id);
+      p.stock = Math.max(0, Number(p.stock || 0) - qty);
+    }
+
+    // Guarda
+    writeJson(PRODUCTS_PATH, products);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Checkout server error." });
+  }
+});
+
+// Ruta fallback
 app.get("/", (req, res) => {
   res.sendFile(path.join(CLIENT_DIR, "index.html"));
 });
@@ -62,6 +122,4 @@ app.get("/", (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-  console.log("Serving frontend from:", CLIENT_DIR);
-  console.log("Reading products from:", PRODUCTS_PATH);
 });
