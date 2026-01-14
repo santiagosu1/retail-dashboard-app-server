@@ -6,6 +6,12 @@ import { fileURLToPath } from "url";
 const app = express();
 app.use(express.json());
 
+// ✅ NO CACHE para la API (evita que el browser use respuestas viejas)
+app.use("/api", (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -40,7 +46,7 @@ app.get("/api/products", (req, res) => {
 app.get("/api/products/:id", (req, res) => {
   try {
     const products = readJson(PRODUCTS_PATH);
-    const product = products.find(p => p.id === req.params.id);
+    const product = products.find((p) => p.id === req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
     res.json(product);
   } catch (err) {
@@ -56,4 +62,6 @@ app.get("/", (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+  console.log("Serving frontend from:", CLIENT_DIR);
+  console.log("Reading products from:", PRODUCTS_PATH);
 });
