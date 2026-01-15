@@ -9,16 +9,13 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ ruta hacia tu frontend (carpeta retail-dashboard-app)
+
 const CLIENT_DIR = path.join(__dirname, "..", "retail-dashboard-app");
 
-// ✅ ruta data/products.json
 const PRODUCTS_PATH = path.join(__dirname, "data", "products.json");
 
-// Servir frontend
 app.use(express.static(CLIENT_DIR));
 
-// Helpers
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf-8"));
 }
@@ -27,9 +24,8 @@ function writeJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
 
-// ===== API =====
+//  API 
 
-// Lista de productos
 app.get("/api/products", (req, res) => {
   try {
     const products = readJson(PRODUCTS_PATH);
@@ -39,7 +35,6 @@ app.get("/api/products", (req, res) => {
   }
 });
 
-// Producto por id
 app.get("/api/products/:id", (req, res) => {
   try {
     const products = readJson(PRODUCTS_PATH);
@@ -51,7 +46,6 @@ app.get("/api/products/:id", (req, res) => {
   }
 });
 
-// ✅ CHECKOUT: resta stock y guarda products.json
 app.post("/api/checkout", (req, res) => {
   try {
     const items = Array.isArray(req.body?.items) ? req.body.items : [];
@@ -60,8 +54,6 @@ app.post("/api/checkout", (req, res) => {
       return res.status(400).json({ error: "Cart is empty." });
     }
 
-    // items esperados: [{ id, qty, size? }]
-    // agregamos por id (stock no depende de talla en tu JSON)
     const qtyById = new Map();
     for (const it of items) {
       const id = String(it.id || "").trim();
@@ -78,7 +70,6 @@ app.post("/api/checkout", (req, res) => {
 
     const products = readJson(PRODUCTS_PATH);
 
-    // Validación: producto existe y stock suficiente
     const errors = [];
     for (const [id, qty] of qtyById.entries()) {
       const p = products.find((x) => x.id === id);

@@ -8,9 +8,9 @@
       "new",
       "Retired"
     ],
-    "stock": 22,
+    "stock": 0,
     "typeLine": "ARCANE | APPAREL | TOPS",
-    "fulfillment": "Estimated Fulfillment Begins Mar 31, 2026",
+    "fulfillment": "Retired item — limited availability",
     "description": "Show your love for Arcane with the Mel and Ambessa Foil Tee. Premium feel, bold foil graphic, and an easy everyday fit.",
     "sizes": [
       "S",
@@ -70,7 +70,7 @@
       "new",
       "Retired"
     ],
-    "stock": 2,
+    "stock": 0,
     "typeLine": "ARCANE | APPAREL | HOODIES & JACKETS",
     "fulfillment": "Retired item — limited availability",
     "description": "A Jinx foil hoodie built for comfort and attitude. Soft interior with a bold Arcane look.",
@@ -88,12 +88,11 @@
     "price": 124.99,
     "image": "./images/products-images/product-5.png",
     "tags": [
-      "new",
-      "Retired"
+      "new"
     ],
     "stock": 15,
     "typeLine": "ARCANE | APPAREL | HOODIES & JACKETS",
-    "fulfillment": "Retired item — limited availability",
+    "fulfillment": "Ships in 3–5 business days",
     "description": "A Jinx foil hoodie built for comfort and attitude. Soft interior with a bold Arcane look.",
     "sizes": [
       "S",
@@ -114,7 +113,7 @@
     ],
     "stock": 8,
     "typeLine": "ARCANE | APPAREL | HOODIES & JACKETS",
-    "fulfillment": "Retired item — limited availability",
+    "fulfillment": "Estimated Fulfillment Begins Mar 31, 2026",
     "description": "A Jinx foil hoodie built for comfort and attitude. Soft interior with a bold Arcane look.",
     "sizes": [
       "S",
@@ -156,7 +155,7 @@
     ],
     "stock": 9,
     "typeLine": "ARCANE | APPAREL | HOODIES & JACKETS",
-    "fulfillment": "Retired item — limited availability",
+    "fulfillment": "Estimated Fulfillment Begins Mar 31, 2026",
     "description": "A Jinx foil hoodie built for comfort and attitude. Soft interior with a bold Arcane look.",
     "sizes": [
       "S",
